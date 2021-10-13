@@ -13,9 +13,9 @@ appointmentsRouter.get('/', (request, response) => {
   return response.json(appointments);
 });
 
-appointmentsRouter.post('/', (resquest, response) => {
+appointmentsRouter.post('/', (request, response) => {
   try {
-    const { provider, date } = resquest.body;
+    const { provider, date } = request.body;
 
     const parsedDate = parseISO(date);
 
