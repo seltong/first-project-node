@@ -1,5 +1,10 @@
 import Transaction from '../models/transaction';
 
+interface Balance {
+  income: number;
+  outcome: number;
+  total: number;
+}
 interface CreateTransactionDTO {
   title: string;
   type: 'income' | 'outcome';
@@ -24,50 +29,35 @@ class TransactionsRepository {
     return transaction;
   }
 
-  public balance() {
-    let { income, outcome } = this.findIncomeOutcome();
+  public getBalance(): Balance {
 
-    let incomeValue = 0;
+    const { income, outcome } = this.transactions.reduce(
+      (accumulator: Balance, transaction: Transaction) => {
+        switch (transaction.type) {
+          case 'income':
+            accumulator.income += transaction.value
+            break;
+          case 'outcome':
+            accumulator.outcome += transaction.value
+            break;
+          default:
+            break;
+        }
+        return accumulator;
+      }, {
+      income: 0,
+      outcome: 0,
+      total: 0
+    });
 
-    if (income.length > 0) {
-      incomeValue = income.reduce((p, c) => {
-        p.value += c.value;
-        return p;
-      }).value;
-    }
-
-    let outcomeValue = 0;
-
-    if (outcome.length > 0) {
-      outcomeValue = outcome.reduce((p, c) => {
-        p.value += c.value;
-        return p;
-      }).value;
-    }
-
-    let total = incomeValue - outcomeValue;
-
-    const balance = {
-      income: incomeValue,
-      outcome: outcomeValue,
-      total
-    };
-
-    return balance;
-  }
-
-  private findIncomeOutcome() {
-    let income: Array<Transaction> = []
-    let outcome: Array<Transaction> = []
-
-    this.transactions.forEach((t) => t.type == 'income' ? income = [...income, t] : outcome = [...outcome, t]);
+    const total = income - outcome;
 
     return {
       income,
-      outcome
+      outcome,
+      total
     };
   }
-
 }
 
 export default TransactionsRepository;

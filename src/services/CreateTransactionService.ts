@@ -14,14 +14,19 @@ class CreateTransactionService {
   }
 
   public execute({ title, type, value }: Request) {
-
-    if (type != 'income' && type != 'outcome') {
-      throw Error('This transaction type is invalid');
+    if (!['income', 'outcome'].includes(type)) {
+      throw Error('Transaction type is invalid');
     }
 
-    const appointment = this.transactionsRepository.create({ title, type, value });
+    const { total } = this.transactionsRepository.getBalance();
 
-    return appointment;
+    if (type == 'outcome' && total < value) {
+      throw Error('You do not have enough balance');
+    }
+
+    const transaction = this.transactionsRepository.create({ title, type, value });
+
+    return transaction;
   }
 }
 
